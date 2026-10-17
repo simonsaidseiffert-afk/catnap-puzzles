@@ -114,6 +114,18 @@ html,body,main,#board,#board *{ -webkit-tap-highlight-color:transparent; }
 #board,#board .cell,#board img{touch-action:none!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;}
 #board img{-webkit-user-drag:none!important;pointer-events:none;}
 @media (pointer:coarse){html,body{overscroll-behavior:none}button{touch-action:manipulation}}
+
+/* v1.0.5: muted cross-outs; preserve recognizable colors without visual glare. */
+.cell.crossed::before {
+ background:
+   repeating-linear-gradient(135deg,transparent 0px,transparent 10px,rgba(56,47,72,.26) 10px,rgba(56,47,72,.26) 12px,transparent 12px,transparent 21px),
+   rgba(108,106,119,.31);
+}
+.board.hard-grid .cell.crossed::before {
+ background:
+   repeating-linear-gradient(135deg,transparent 0px,transparent 7px,rgba(53,44,73,.34) 7px,rgba(53,44,73,.34) 9px,transparent 9px,transparent 15px),
+   rgba(108,106,119,.34);
+}
 </style><script>
 (function(){
   const key='catnap-theme-v1';
