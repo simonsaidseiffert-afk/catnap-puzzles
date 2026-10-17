@@ -311,6 +311,11 @@ window.addEventListener('pagehide',()=>{pauseClock();save()});
 /* Stop Safari interpreting board taps as zoom or page-scroll gestures. */
 const mobileBoard = document.getElementById('board');
 mobileBoard.addEventListener('touchmove', e => e.preventDefault(), {passive:false});
+// iOS can zoom before the synthetic dblclick event fires. Cancel the
+// touchend default itself, while letting pointerup drive our cat controls.
+mobileBoard.addEventListener('touchend', e => {
+  if (e.cancelable && e.changedTouches.length === 1) e.preventDefault();
+}, {passive:false});
 mobileBoard.addEventListener('dblclick', e => e.preventDefault());
 document.addEventListener('gesturestart', e => { if (mobileBoard.contains(e.target)) e.preventDefault(); }, {passive:false});
 </script></body></html>
