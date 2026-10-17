@@ -108,6 +108,12 @@ html[data-theme="dark"] .ad{border-color:#897397}
 }
 .mobile-controls{display:none}@media(pointer:coarse){.mobile-controls{display:inline}.desktop-controls{display:none}}
 #board{-webkit-touch-callout:none;touch-action:none} .cell{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+
+/* iOS interaction guard: no native image ghost or zoom from rapid taps. */
+html,body,main,#board,#board *{ -webkit-tap-highlight-color:transparent; }
+#board,#board .cell,#board img{touch-action:none!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;}
+#board img{-webkit-user-drag:none!important;pointer-events:none;}
+@media (pointer:coarse){html,body{overscroll-behavior:none}button{touch-action:manipulation}}
 </style><script>
 (function(){
   const key='catnap-theme-v1';
@@ -240,7 +246,7 @@ function animateBoard(){const b=$('board');b.classList.remove('entering');void b
 function next(){pauseClock();idx++;setPuzzle({});sound('start')}
 
 function conflictIndices(){let bad=new Set();const cats=marks.map((v,i)=>v===2?i:-1).filter(x=>x>=0);for(let j=0;j<cats.length;j++)for(let k=j+1;k<cats.length;k++){let a=cats[j],b=cats[k],ar=Math.floor(a/size),ac=a%size,br=Math.floor(b/size),bc=b%size;if(ar===br||ac===bc||puzzle.grid[ar][ac]===puzzle.grid[br][bc]||(Math.abs(ar-br)<=1&&Math.abs(ac-bc)<=1)){bad.add(a);bad.add(b)}}return bad}
-function render(){let labels=$('colLabels'),rows=$('rowLabels');labels.style.gridTemplateColumns=`repeat(${size},minmax(0,1fr))`;rows.style.gridTemplateRows=`repeat(${size},minmax(0,1fr))`;labels.replaceChildren();rows.replaceChildren();for(let k=0;k<size;k++){let a=document.createElement('span'),r=document.createElement('span');a.textContent=String.fromCharCode(65+k);r.textContent=String(k+1);labels.append(a);rows.append(r)}let b=$('board');b.classList.remove('entering');b.classList.toggle('large',size===16);b.classList.toggle('hard-grid',size===10);b.style.gridTemplateColumns=`repeat(${size},1fr)`;b.replaceChildren();let conflicts=conflictIndices();for(let r=0;r<size;r++)for(let c=0;c<size;c++){let i=r*size+c,e=document.createElement('div');e.className='cell'+(((puzzle.clues||[]).includes(i)||(puzzle.givenCats||[]).includes(i))?' given':'')+(marks[i]===1?' crossed':'')+((conflicts.has(i)||(marks[i]===2&&puzzle.solution[r]!==c))?' conflict':'');e.style.backgroundColor=COLORS[regionPalette[puzzle.grid[r][c]]];e.style.setProperty('--region-color',COLORS[regionPalette[puzzle.grid[r][c]]]);e.innerHTML=marks[i]===1?'<span class="x">✕</span>':marks[i]===2?`<span class="cat"><img class="catimg" alt="cat" src="${CAT_SRC}"></span>`:'';e.style.setProperty('--tile-order',r+c);if((puzzle.givenCats||[]).includes(i))e.classList.add('starter-cat');e.dataset.i=i;e.setAttribute('role','gridcell');e.setAttribute('aria-label',`Row ${r+1}, column ${c+1}`);b.append(e)}$('level').textContent=`Level ${idx+1} · ${size}×${size}`;$('count').innerHTML=`${marks.filter(x=>x===2).length} / ${size} <img class="ui-cat ui-cat-inline" src="${CAT_SRC}" alt=""> · Mistakes ${mistakes}/${LIMITS[size]} · 💡 ${hintsUsed}`;$('viewWin').style.display=complete&&marks.filter(x=>x===2).length===size?'block':'none';$('next').textContent=complete&&marks.filter(x=>x===2).length===size?'Next level →':'↻ New puzzle'}
+function render(){let labels=$('colLabels'),rows=$('rowLabels');labels.style.gridTemplateColumns=`repeat(${size},minmax(0,1fr))`;rows.style.gridTemplateRows=`repeat(${size},minmax(0,1fr))`;labels.replaceChildren();rows.replaceChildren();for(let k=0;k<size;k++){let a=document.createElement('span'),r=document.createElement('span');a.textContent=String.fromCharCode(65+k);r.textContent=String(k+1);labels.append(a);rows.append(r)}let b=$('board');b.classList.remove('entering');b.classList.toggle('large',size===16);b.classList.toggle('hard-grid',size===10);b.style.gridTemplateColumns=`repeat(${size},1fr)`;b.replaceChildren();let conflicts=conflictIndices();for(let r=0;r<size;r++)for(let c=0;c<size;c++){let i=r*size+c,e=document.createElement('div');e.className='cell'+(((puzzle.clues||[]).includes(i)||(puzzle.givenCats||[]).includes(i))?' given':'')+(marks[i]===1?' crossed':'')+((conflicts.has(i)||(marks[i]===2&&puzzle.solution[r]!==c))?' conflict':'');e.style.backgroundColor=COLORS[regionPalette[puzzle.grid[r][c]]];e.style.setProperty('--region-color',COLORS[regionPalette[puzzle.grid[r][c]]]);e.innerHTML=marks[i]===1?'<span class="x">✕</span>':marks[i]===2?`<span class="cat"><img class="catimg" alt="cat" draggable="false" src="${CAT_SRC}"></span>`:'';e.style.setProperty('--tile-order',r+c);if((puzzle.givenCats||[]).includes(i))e.classList.add('starter-cat');e.dataset.i=i;e.setAttribute('role','gridcell');e.setAttribute('aria-label',`Row ${r+1}, column ${c+1}`);b.append(e)}$('level').textContent=`Level ${idx+1} · ${size}×${size}`;$('count').innerHTML=`${marks.filter(x=>x===2).length} / ${size} <img class="ui-cat ui-cat-inline" src="${CAT_SRC}" alt=""> · Mistakes ${mistakes}/${LIMITS[size]} · 💡 ${hintsUsed}`;$('viewWin').style.display=complete&&marks.filter(x=>x===2).length===size?'block':'none';$('next').textContent=complete&&marks.filter(x=>x===2).length===size?'Next level →':'↻ New puzzle'}
 function setMark(i,v,source=''){if(complete||i<0||i>=marks.length||marks[i]===v||((puzzle.clues||[]).includes(i)||(puzzle.givenCats||[]).includes(i)))return false;beginClock();
 if(v===2&&source!=='hint'&&puzzle.solution[Math.floor(i/size)]!==i%size){mistakes++;sound('wrong');render();save();$('message').textContent=`⚠ Wrong cat! ${Math.max(0,LIMITS[size]-mistakes)} attempts left.`;if(mistakes>=LIMITS[size]){finishLoss();setTimeout(()=>sound('lose'),430);complete=true;save();setTimeout(()=>modal('💔','Out of tries','The cats need a fresh start.','Retry puzzle',()=>{marks=Array(size*size).fill(0);for(let i of (puzzle.givenCats||[]))marks[i]=2;mistakes=0;hintsUsed=0;complete=false;elapsedMs=0;runStartedAt=null;winSummary=null;history=[];$('overlay').classList.remove('show');render();save()}),50)}return false}
 marks[i]=v;if(source==='drag'){const now=performance.now();if(now-lastDragSound>55){sound(v===1?'cross':'clear');lastDragSound=now}}else{sound(v===2?'cat':v===1?'cross':'clear')}render();save();let bad=conflictIndices();if(v===2&&puzzle.solution[Math.floor(i/size)]!==i%size)$('message').textContent='⚠️ That cat is not in the correct square. Try again!';else if(v===2&&bad.has(i))$('message').textContent='⚠️ This cat conflicts with another cat.';else if(bad.size)$('message').textContent='⚠️ Red outlines: cats violate a rule.';else $('message').textContent=source==='drag'?'Drag to mark or clear more squares.':'Keep deducing!';if(!bad.size&&marks.filter(x=>x===2).length===size){let usedC=new Set(),usedReg=new Set();let good=true;for(let r=0;r<size;r++){let c=marks.slice(r*size,(r+1)*size).indexOf(2);if(c<0||usedC.has(c)||usedReg.has(puzzle.grid[r][c]))good=false;usedC.add(c);usedReg.add(puzzle.grid[r][c])}if(good){complete=true;finishWin();sound('win');render();save();setTimeout(()=>modal('🎉','Purrfect!',`Solved! ${winSummary}`,'Next level →',next),200)}}return true}
@@ -249,6 +255,22 @@ function indexFromPoint(x,y){let t=document.elementFromPoint(x,y);let cell=t&&t.
 const board=$('board');
 const mobileTouch = e => e.pointerType==='touch' || e.pointerType==='pen';
 const HOLD_MS=480;
+
+let lastTouchInteraction=0;
+let recentTouchEnd=0;
+const onBoardTouch=e=>{
+ lastTouchInteraction=Date.now();
+ // No native touch clicks or Safari double-tap gesture should act on the puzzle.
+ if(e.cancelable)e.preventDefault();
+ if(e.type==='touchend')recentTouchEnd=Date.now();
+};
+board.addEventListener('touchstart',onBoardTouch,{passive:false});
+board.addEventListener('touchmove',onBoardTouch,{passive:false});
+board.addEventListener('touchend',onBoardTouch,{passive:false});
+board.addEventListener('touchcancel',onBoardTouch,{passive:false});
+board.addEventListener('dragstart',e=>e.preventDefault());
+board.addEventListener('selectstart',e=>e.preventDefault());
+
 function clearHold(g){if(g&&g.holdTimer){clearTimeout(g.holdTimer);g.holdTimer=null}}
 board.addEventListener('pointerdown',e=>{
  if(e.button!==0&&e.pointerType==='mouse')return;
@@ -301,7 +323,7 @@ board.addEventListener('pointerup',endGesture);board.addEventListener('pointerca
 board.addEventListener('contextmenu',e=>{
  e.preventDefault();
  // iOS long-press contextmenu must not place a second cat.
- if(e.sourceCapabilities?.firesTouchEvents||('ontouchstart' in window&&e.pointerType!=='mouse'))return;
+ if(!e.isTrusted || Date.now()-lastTouchInteraction<1100)return;
  const cell=e.target.closest('.cell');if(!cell||complete)return;
  const i=+cell.dataset.i;
  if((puzzle.clues||[]).includes(i)||(puzzle.givenCats||[]).includes(i))return;
