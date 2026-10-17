@@ -1,0 +1,24 @@
+{
+  "name": "Catnap Puzzles",
+  "short_name": "Catnap",
+  "description": "Logic-first cat placement puzzles \u2014 play offline, with no ads.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff9f5",
+  "theme_color": "#753e9b",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
